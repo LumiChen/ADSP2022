@@ -1,2 +1,3 @@
 # ADSP2022
-This repository only for store purpose.
+NTU ADSP 2022
+This repository only for back-up purpose.
