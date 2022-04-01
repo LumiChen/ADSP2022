@@ -3,13 +3,31 @@ from numpy import cos, pi
 import matplotlib.pyplot as plt
 
 
-def H(F):
-    if -0.25 < F <= 0.25:
-        return 1
-    elif -0.5 < F <= -0.25:
-        return 0
-    elif 0.25 < F < 0.5:
-        return 0
+def H(F, transition=False):
+    if not transition:
+        if -0.25 < F <= 0.25:
+            return 1
+        elif -0.5 < F <= -0.25:
+            return 0
+        elif 0.25 < F < 0.5:
+            return 0
+    else:
+        print("trans")
+        # 0.75
+        if -0.5 < F <= -0.275:
+            return 0
+        elif -0.275 < F < -0.25:
+            return 0.2
+        elif -0.25 <= F < -0.242:
+            return 0.7
+        elif -0.242 <= F <= 0.242:
+            return 1
+        elif -0.242 < F < 0.25:
+            return 0.7
+        elif 0.25 <= F < 0.275:
+            return 0.2
+        elif 0.275 <= F <= 0.5:
+            return 0
 
 
 def r1_to_rn(r1):    # step 3
@@ -93,13 +111,14 @@ if __name__ == "__main__":
 
     # step 1
     s = []
-    sn = 17  # the number of sampling number
+    sn = 33  # the number of sampling number
+    trans = False
     for i in range(sn):
         p = i / sn
         if p > 0.5:
-            s.append(H(p - 1))
+            s.append(H(p - 1, transition=trans))
         else:
-            s.append(H(p))
+            s.append(H(p, transition=trans))
     print(s)
     print("The number of sampling points: {}".format(sn))
     print("---------------")
