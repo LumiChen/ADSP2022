@@ -46,7 +46,7 @@ def R_i(ri, F):
     temp = 0.0
     k = (len(ri) - 1) // 2
     for n in range(len(r)):
-        temp += (float(rn(ri, n - k) * float(np.sin(2 * pi * F * (n - k)))))
+        temp += (float(rn(ri, n - k) * float(-(np.sin(2 * pi * F * (n - k))))))
 
     return temp
 
@@ -126,12 +126,15 @@ if __name__ == "__main__":
         h[i] = rn(r, i - k)  # n = -8 ~ 8 from step 3
 
     RF = []
+    RI = []
     for i in Interval_F:
         RF.append(R(r, i))
+        RI.append(R_i(r, i))
 
     for i in range(len(h)):
         print("h[{}] = {}".format(i, round(h[i], 3)))
     print("------------")
 
+    plot_(Interval_F, value1=RI, value2=None, mode='plot', name='RI')
     plot_(Interval_F, value1=RF, value2=Hd, mode='plot', name='frequency response')
     plot_(Interval_s, value1=h, value2=None, mode='scatter', name='h[n]')
