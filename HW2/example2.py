@@ -12,7 +12,7 @@ def H(F):
         return 0
 
 
-def r_n(r1):    # step 3
+def r1_to_rn(r1):    # step 3
     k = (len(r1) - 1) // 2  # 8
     temp = [0.0 for i in range(len(r1))]
     for n in range(len(r1)):
@@ -23,7 +23,7 @@ def r_n(r1):    # step 3
     return temp
 
 
-def r_p(r1, n):  # r period step 4
+def rn(r1, n):  # r period step 4
 
     N = len(r1)
     k = (N - 1) // 2
@@ -37,55 +37,101 @@ def R(r, F):
     temp = 0.0
     k = (len(r) - 1) // 2
     for n in range(len(r)):
-        temp += (float(r_p(r, n - k) * float(cos(2*pi*F*(n - k)))))
+        temp += (float(rn(r, n - k) * float(cos(2 * pi * F * (n - k)))))
 
     return temp
+
+
+def R_i(ri, F):
+    temp = 0.0
+    k = (len(ri) - 1) // 2
+    for n in range(len(r)):
+        temp += (float(rn(ri, n - k) * float(np.sin(2 * pi * F * (n - k)))))
+
+    return temp
+
+
+def plot_(interval, value1, value2, mode, name):
+    assert mode in ['scatter', 'plot']
+    if not value2:
+        if mode == 'scatter':
+            plt.scatter(interval, value1)
+            plt.savefig(name + ".png")
+            plt.show()
+            plt.close()
+        elif mode == 'plot':
+            plt.plot(interval, value1)
+            plt.savefig(name + ".png")
+            plt.show()
+            plt.close()
+    else:
+        if mode == 'scatter':
+            plt.scatter(interval, value1, c='r')
+            plt.scatter(interval, value2, c='b')
+            plt.savefig(name + ".png")
+            plt.show()
+            plt.close()
+        elif mode == 'plot':
+            plt.plot(interval, value1, c='r')
+            plt.plot(interval, value2, c='b')
+            plt.savefig(name + ".png")
+            plt.show()
+            plt.close()
 
 
 if __name__ == "__main__":
 
     # set up
-    interval_F = np.arange(0, 0.9999, 0.0001)
-    F = []
-    for i in interval_F:
+    Interval_F = np.arange(0, 0.9999, 0.0001)
+    Hd = []
+    #  the ideal filter
+    for i in Interval_F:
         if i > 0.5:
-            F.append(H(i - 1))
+            Hd.append(H(i - 1))
         else:
-            F.append(H(i))
+            Hd.append(H(i))
 
     # step 1
-    a = [1, 1, 1, 1, 1, 1, 1, 1, 0.7,
-         0.2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2,
-         0.7, 1, 1, 1, 1, 1, 1, 1]
-    print(len(a))
+    s = []
+    sn = 17  # the number of sampling number
+    for i in range(sn):
+        p = i / sn
+        if p > 0.5:
+            s.append(H(p - 1))
+        else:
+            s.append(H(p))
+    print(s)
+    print("The number of sampling points: {}".format(sn))
+    print("---------------")
+
+    k = (len(s) - 1) // 2
+    Interval_s = np.arange(0, len(s), 1)  # interval of sampling
+    Interval_r = [i - k for i in range(len(s))]
+
     # step 2
-    r1 = np.fft.ifft(a)
+    r1 = np.fft.ifft(s)
     ri = r1.imag
 
     # step 3
-    r = r_n(r1.real)
+    r = r1_to_rn(r1.real)
+    for i in range(len(r)):
+        print("r[{}] = {}".format(i - k, round(r[i], 3)))
+    print("-------------")
+
+    plot_(Interval_r, value1=r, value2=None, mode='scatter', name='r[n]')
 
     # step 4
     h = [0 for i in range(len(r))]
-    k = (len(r) - 1) // 2
     for i in range(len(r)):
-        h[i] = r_p(r, i - k)  # n = -8 ~ 8 from step 3
+        h[i] = rn(r, i - k)  # n = -8 ~ 8 from step 3
 
-    k = []
-    for i in interval_F:
-        k.append(R(r, i))
+    RF = []
+    for i in Interval_F:
+        RF.append(R(r, i))
 
     for i in range(len(h)):
-        print("h[{}] = {}".format(i, h[i]))
+        print("h[{}] = {}".format(i, round(h[i], 3)))
     print("------------")
 
-    plt.plot(interval_F, k, c='r')
-    plt.plot(interval_F, F, c='b')
-    plt.savefig("signal.png")
-    plt.show()
-    plt.close()
-    Interval_h = np.arange(0, len(r), 1)
-    plt.scatter(Interval_h, h, c='b')
-    plt.savefig("response.png")
-    plt.show()
-    plt.close()
+    plot_(Interval_F, value1=RF, value2=Hd, mode='plot', name='frequency response')
+    plot_(Interval_s, value1=h, value2=None, mode='scatter', name='h[n]')
